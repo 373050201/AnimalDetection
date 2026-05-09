@@ -19,8 +19,9 @@ train_dataset=YoloDataset("datasets/animals_yolo/images/train",
                                 transforms.Resize((img_size, img_size)),
                                 transforms.Normalize(mean=mean, std=std)
                             ]),
-                            label_transform=format_convert)
-train_loader=DataLoader(train_dataset,batch_size=8)
+                            label_transform=format_convert,
+                            aug=True)
+train_loader=DataLoader(train_dataset,batch_size=8,shuffle=True)
 val_dataset=YoloDataset("datasets/animals_yolo/images/val",
                         "datasets/animals_yolo/labels/val",
                         img_transform=transforms.Compose([
@@ -41,6 +42,7 @@ optimizer=torch.optim.Adam(myModel.parameters(),lr=learning_rate)
 
 total_train=0
 epoch=100
+best_rate=0.0
 for i in range(epoch):
     print(f"第{i+1}次训练开始")
     train_lct_loss_sum=0
@@ -91,6 +93,11 @@ for i in range(epoch):
                         total_correct+=1
         print(f"验证集lct损失：{val_lct_loss_sum:.6f},验证集cls损失：{val_cls_loss_sum:.6f}")
         print(f"验证集总损失：{val_lct_loss_sum+val_cls_loss_sum:.6f}")
-        print(f"验证集预测准确率：{total_correct/len(val_dataset):.6f}")
+        correct_rate=total_correct/len(val_dataset)
+        print(f"验证集预测准确率：{correct_rate:.6f}")
+        if correct_rate>=best_rate:
+            best_rate=correct_rate
+            torch.save(myModel.state_dict(),f"model_best.pth")
 print("训练结束")
-torch.save(myModel.state_dict(),f"model_{epoch}.pth")
+print(f"验证集最佳准确率：{best_rate:.6f}")
+#torch.save(myModel.state_dict(),f"model_last_{epoch}.pth")

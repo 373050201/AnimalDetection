@@ -3,6 +3,7 @@ from PIL import Image
 from model import MyModel
 from torchvision import transforms
 import cv2
+import matplotlib.pyplot as plt
 
 
 
@@ -19,7 +20,7 @@ def load_image(path):
 print("正在加载模型...")
 myModel=MyModel()
 myModel=myModel.cuda()
-state_dict = torch.load("./model_100.pth")
+state_dict = torch.load("./model_best.pth")
 myModel.load_state_dict(state_dict)
 img_path= "detect/detect.png"
 label_path= "detect/detect.txt"
@@ -55,5 +56,7 @@ for line in lines:
     y2 = int((cy + bh/2) * h)
     cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-cv2.imshow('Annotation', image)
-cv2.waitKey(0)
+image_rgb=cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+plt.imshow(image_rgb)
+plt.axis('off')
+plt.show()
